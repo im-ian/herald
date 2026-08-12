@@ -27,7 +27,25 @@ flowchart LR
 
 ## 사용하기
 
-요구 사항은 Android 8.0(API 26) 이상입니다.
+앱 요구 사항은 Android 8.0(API 26) 이상입니다. 소스에서 빌드하려면 JDK 17과 Android SDK 36·Platform-Tools(`adb`)가 필요하며, Android Studio에서 해당 SDK를 설치하는 방법이 가장 간단합니다.
+
+### 한 명령으로 기기에 설치
+
+Android 기기에서 개발자 옵션과 USB 디버깅(또는 무선 디버깅)을 켜고 컴퓨터 연결을 허용한 뒤 실행합니다.
+
+```bash
+./scripts/install-device.sh
+```
+
+스크립트는 연결된 기기를 확인하고 debug APK를 빌드·설치한 다음 Herald를 실행합니다. 여러 기기가 연결돼 있으면 대상을 명시합니다.
+
+```bash
+ANDROID_SERIAL=<adb-serial> ./scripts/install-device.sh
+```
+
+같은 컴퓨터에서 계속 `installDebug`하면 로컬 Android debug key로 서명이 유지되어 기존 설치 위에 업그레이드됩니다. `~/.android/debug.keystore`를 삭제하거나 다른 컴퓨터에서 빌드하면 서명이 달라져 기존 debug 앱을 먼저 제거해야 할 수 있습니다.
+
+### 앱 설정
 
 1. Debug APK를 설치하고 Herald를 엽니다.
 2. **권한 연결**을 눌러 Android의 알림 접근 설정에서 Herald를 허용합니다.
@@ -37,8 +55,10 @@ flowchart LR
 
 ```bash
 ./gradlew testDebugUnitTest lintDebug assembleDebug
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:installDebug
 ```
+
+`main` 브랜치의 GitHub Actions도 설치 가능한 debug APK를 14일간 artifact로 제공합니다. CI가 만든 debug 서명은 장기 배포용이 아니므로, 반복 업그레이드에는 위의 로컬 설치 방식을 사용하세요.
 
 ## 웹훅 계약
 
