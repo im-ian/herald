@@ -2,6 +2,7 @@ package dev.imian.herald.settings
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -152,6 +153,24 @@ class WebhookValidatorTest {
                 "https:///missing-host",
                 allowInsecureLocalHttp = false,
             ).isValid,
+        )
+    }
+
+    @Test
+    fun `credential changes create a different delivery route`() {
+        val endpoint = "https://example.com/hook"
+
+        assertNotEquals(
+            WebhookRouteId.from(endpoint, "tenant-a-token"),
+            WebhookRouteId.from(endpoint, "tenant-b-token"),
+        )
+        assertNotEquals(
+            WebhookRouteId.from(endpoint, "tenant-a-token"),
+            WebhookRouteId.from("https://other.example.com/hook", "tenant-a-token"),
+        )
+        assertEquals(
+            WebhookRouteId.from(endpoint, "tenant-a-token"),
+            WebhookRouteId.from(endpoint, "tenant-a-token"),
         )
     }
 }

@@ -10,7 +10,10 @@ data class HeraldSettings(
     val allowInsecureLocalHttp: Boolean,
 ) {
     val deliveryEndpoint: String? get() = webhookUrl.ifBlank { null }
-    val deliveryRouteId: String? get() = deliveryEndpoint?.let(WebhookRouteId::fromEndpoint)
+    val deliveryRouteId: String?
+        get() = deliveryEndpoint?.let { endpoint ->
+            WebhookRouteId.from(endpoint, bearerToken)
+        }
 }
 
 data class SettingsInput(
@@ -198,10 +201,16 @@ class SettingsStore(context: Context) {
 }
 
 object WebhookRouteId {
-    fun fromEndpoint(endpoint: String): String {
+    fun from(endpoint: String, bearerToken: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
-            .digest(endpoint.toByteArray(Charsets.UTF_8))
-        return digest.joinToString(separator = "") { byte ->
+        listOf("herald-route-v2", endpoint, bearerToken).forEach { field ->
+            val bytes = field.toByteArray(Charsets.UTF_8)
+            digest.update(bytes.size.toString().toByteArray(Charsets.US_ASCII))
+            digest.update(':'.code.toByte())
+            digest.update(bytes)
+            digest.update(0)
+        }
+        return digest.digest().joinToString(separator = "") { byte ->
             "%02x".format(byte.toInt() and 0xff)
         }
     }

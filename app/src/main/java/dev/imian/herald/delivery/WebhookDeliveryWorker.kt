@@ -36,7 +36,7 @@ class WebhookDeliveryWorker(
         if (event.deliveryRouteId != settings.deliveryRouteId) {
             repository.markFailure(
                 eventId,
-                "웹훅 주소가 변경되었습니다. 확인 후 수동으로 재시도해 주세요.",
+                "웹훅 주소 또는 인증정보가 변경되었습니다. 확인 후 수동으로 재시도해 주세요.",
                 terminal = true,
             )
             return Result.failure()
